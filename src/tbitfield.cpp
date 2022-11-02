@@ -97,6 +97,10 @@ int TBitField::GetBit(const int n) const // получить значение б
 
 TBitField& TBitField::operator=(const TBitField& bf) // присваивание
 {
+	if (*this == bf)
+	{
+		return *this;
+	}
 	delete[] pMem;
 	MemLen = bf.MemLen;
 	BitLen = bf.BitLen;
@@ -154,20 +158,36 @@ TBitField TBitField::operator&(const TBitField& bf) // операция "и"
 {
 	if (BitLen >= bf.BitLen)
 	{
+		int i = 0;
 		TBitField _temp(*this);
-		for (int i = 0; i < bf.MemLen; i++)
+		for (i; i < bf.MemLen; i++)
 		{
 			_temp.pMem[_temp.GetMemIndex(i)] = _temp.pMem[_temp.GetMemIndex(i)] & bf.pMem[bf.GetMemIndex(i)];
 		}
+		if (BitLen != bf.BitLen)
+		{
+			for (i; i < MemLen; i++)
+			{
+				ClrBit(i);
+			}
+		}
+		cout << _temp << endl;
+		
 		return _temp;
 	}
 	else
 	{
+		int i = 0;
 		TBitField _temp(bf);
-		for (int i = 0; i < MemLen; i++)
+		for (i; i < MemLen; i++)
 		{
 			_temp.pMem[_temp.GetMemIndex(i)] = _temp.pMem[_temp.GetMemIndex(i)] & pMem[GetMemIndex(i)];
 		}
+		for (i; i < bf.MemLen; i++)
+		{
+			ClrBit(i);
+		}
+		cout << _temp << endl;
 		return _temp;
 	}
 }
@@ -193,12 +213,16 @@ TBitField TBitField::operator~(void) // отрицание
 istream& operator>>(istream& istr, TBitField& bf) // ввод
 {
 	unsigned int _temp;
-	for (int i = 0; i < bf.MemLen; i++)
+	for (int i = 0; i < bf.GetLength(); i++)
 	{
 		istr >> _temp;
-		if (_temp <= 1)
+		if (_temp == 0)
 		{
-			bf.pMem[bf.GetMemIndex(i)] << _temp;
+			bf.ClrBit(i);
+		}
+		else if (_temp == 1)
+		{
+			bf.SetBit(i);
 		}
 		else
 		{
@@ -210,10 +234,11 @@ istream& operator>>(istream& istr, TBitField& bf) // ввод
 ostream& operator<<(ostream& ostr, const TBitField& bf) // вывод
 {
 	unsigned int _temp;
-	for (int i = 0; i < bf.MemLen; i++)
+	for (int i = 0; i < bf.GetLength(); i++)
 	{
 		ostr << bf.GetBit(i);
-		return ostr;
+
 	}
+	return ostr;
 
 }
